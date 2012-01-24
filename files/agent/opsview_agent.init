@@ -1,0 +1,95 @@
+#! /bin/sh
+#
+
+### BEGIN INIT INFO
+# Provides:          opsview-agent
+# Required-Start:    $local_fs $remote_fs $syslog $named $network $time
+# Required-Stop:     $local_fs $remote_fs $syslog $named $network
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start/Stop the Nagios remote plugin execution daemon
+### END INIT INFO
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/local/nagios/bin/nrpe
+NAME=opsview-agent
+DESC=opsview-agent
+CONFIG=/usr/local/nagios/etc/nrpe.cfg
+PIDFILE=/usr/local/nagios/var/nrpe.pid
+
+# Problem due to file descriptor left open by Debian apt-get process
+exec 3>/dev/null
+
+test -x $DAEMON || exit 0
+
+set -e
+
+do_status() {
+    set +e
+    
+    # Test if the daemon is running
+    start-stop-daemon --test --start --pidfile "$PIDFILE" \
+    --exec "$DAEMON" \
+    >/dev/null 2>&1
+    if [ "$?" = "0" ]; then
+    if [ -r "$PIDFILE" -a -s "$PIDFILE" ]; then
+    log_success_msg "$DESC is not running, but PID file exists."
+    return 1
+    else
+    log_success_msg "$DESC is not running."
+    return 3
+    fi
+    else
+    log_success_msg "$DESC is running with pid $(cat $PIDFILE)"
+    fi
+    set -e
+    
+    return 0
+}
+
+case "$1" in
+  start)
+	echo "Starting $DESC" "$NAME"
+    # cleanup pidfile if necessary
+    if [ -f $PIDFILE ]; then
+        ps -p `cat $PIDFILE` | grep nrpe 1>/dev/null || rm -f $PIDFILE
+    fi
+    start-stop-daemon --chuid nagios --oknodo --start $NICENESS --exec $DAEMON -- -c $CONFIG -d $DAEMON_OPTS
+	;;
+  stop)
+	echo "Stopping $DESC" "$NAME"
+	start-stop-daemon --stop --quiet --oknodo --exec $DAEMON
+	;;
+  status)
+	do_status
+	case "$?" in
+		0) log_end_msg 0 ;;
+		3) log_end_msg 3 ;;
+		*) log_end_msg 1 ;;
+	esac
+	;;
+  reload|force-reload)
+	echo "Reloading $DESC configuration files" "$NAME"
+	start-stop-daemon --stop --signal HUP --quiet --exec $DAEMON
+	;;
+  restart)
+	$0 stop
+	sleep 1
+	$0 start
+	;;
+  *)
+	echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
