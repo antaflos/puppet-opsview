@@ -22,7 +22,8 @@ class opsview::puppet::config {
     ip             => $::fqdn,
     require        => [ Class['opsview::puppet::install'], Opsview_hostgroup[$opsview::puppet::hostgroup] ],
     hostgroup      => $opsview::puppet::hostgroup,
-    hosttemplates  => ['Application - Opsview Client','Network - Base','OS - Unix Base',],
+    # ACHTUNG: hosttemplates überschreiben bisherige config!!!
+    #    hosttemplates  => ['Application - Opsview Client','Network - Base','OS - Unix Base',],
     reload_opsview => true,
   }
 }
