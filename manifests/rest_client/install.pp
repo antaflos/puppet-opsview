@@ -1,14 +1,7 @@
 class opsview::rest_client::install {
+	include 'rubygems'
 
   package { 'libjson-ruby':
-    ensure => 'latest',
-  }
-  
-  #package { 'librestclient-ruby':
-  #  ensure => 'latest',
-  #}
-
-  package { 'rubygems':
     ensure => 'latest',
   }
   
@@ -17,5 +10,6 @@ class opsview::rest_client::install {
     provider => 'gem',
   }
 
-  Package['rubygems'] -> Package['rest-client']
+  Class['rubygems'] 
+  -> Package['rest-client']
 }
