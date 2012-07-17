@@ -13,6 +13,6 @@ class opsview::rest_client::config {
     group   => 'root',
     mode    => '0644',
     path    => '/etc/puppet/opsview.conf',
-    content  => template('opsview/rest_client/opsview.erb'),
+    source  => 'puppet:///modules/opsview/rest_client/opsview.conf',
   }
 }
