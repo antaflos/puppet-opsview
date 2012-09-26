@@ -9,6 +9,13 @@ class opsview::rest_client::host::hostgroups {
     require        => Class['opsview::rest_client']
   }
 
+  opsview_hostgroup { 'Mgmt Server':
+    ensure         => 'present',
+    hostgroup      => 'Mgmt Server',
+    reload_opsview => true,
+    require        => Class['opsview::rest_client']
+  }
+
   opsview_hostgroup { 'pbx Server':
     ensure         => 'present',
     hostgroup      => 'pbx Server',
@@ -16,9 +23,9 @@ class opsview::rest_client::host::hostgroups {
     require        => Class['opsview::rest_client']
   }
   
-  opsview_hostgroup { 'Mgmt Server':
+  opsview_hostgroup { 'scrat Server':
     ensure         => 'present',
-    hostgroup      => 'Mgmt Server',
+    hostgroup      => 'scrat Server',
     reload_opsview => true,
     require        => Class['opsview::rest_client']
   }
