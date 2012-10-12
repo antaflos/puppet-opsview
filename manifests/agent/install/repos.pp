@@ -1,7 +1,7 @@
 class opsview::agent::install::repos {
   apt::source { 'opsview_agent':
-    location    => 'http://downloads.opsera.com/opsview-community/latest/apt',
-    release     => 'lucid',
+    location    => 'http://downloads.opsview.com/opsview-core/latest/apt',
+    release     => $::lsbdistcodename,
     repos       => 'main',
     key         => '0FC6984B',
     key_content => '-----BEGIN PGP PUBLIC KEY BLOCK-----
