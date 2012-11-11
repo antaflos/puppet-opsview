@@ -1,8 +1,10 @@
-define opsview::server::addservicegroup {
+define opsview::server::servicegroup (
+  $ensure = 'present',
+){
   require 'opsview::rest_client'
 
   opsview_servicegroup { $title:
-    ensure         => 'present',
+    ensure         => $ensure,
     servicegroup   => $title,
     reload_opsview => true,
   }

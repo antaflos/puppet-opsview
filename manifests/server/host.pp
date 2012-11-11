@@ -1,4 +1,4 @@
-class opsview::server::addhost (
+class opsview::server::host (
   $hostgroup
 ){
   require 'opsview::rest_client'
@@ -6,8 +6,8 @@ class opsview::server::addhost (
   @@opsview_monitored { $::hostname:
     ensure         => 'present',
     ip             => $::fqdn,
-    require        => Opsview_hostgroup[$opsview::server::addhost::hostgroup],
-    hostgroup      => $opsview::server::addhost::hostgroup,
+    require        => Opsview_hostgroup[$opsview::server::host::hostgroup],
+    hostgroup      => $opsview::server::host::hostgroup,
     # ACHTUNG: hosttemplates überschreiben bisherige config!!!
     #    hosttemplates  => ['Application - Opsview Client','Network - Base','OS - Unix Base',],
     reload_opsview => true,

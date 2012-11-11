@@ -1,4 +1,4 @@
-define opsview::server::addservicecheck (
+define opsview::server::servicecheck (
   $ensure = 'present',
   $description = '',
   $servicegroup,
@@ -23,7 +23,7 @@ define opsview::server::addservicecheck (
     plugin               => $plugin,
     args                 => $args,
     reload_opsview       => true,
-    require              => Opsview::Server::Addservicegroup[$servicegroup]
+    require              => Opsview::Server::Servicegroup[$servicegroup]
   }
 
 }

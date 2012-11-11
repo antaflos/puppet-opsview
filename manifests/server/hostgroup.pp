@@ -1,4 +1,4 @@
-define opsview::server::addhostgroup (
+define opsview::server::hostgroup (
   $ensure = 'present',
 ){
   require 'opsview::rest_client'
