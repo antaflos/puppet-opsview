@@ -23,7 +23,6 @@ define opsview::server::servicecheck (
     plugin               => $plugin,
     args                 => $args,
     reload_opsview       => true,
-    require              => Opsview::Server::Servicegroup[$servicegroup]
   }
 
 }
