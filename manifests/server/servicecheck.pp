@@ -1,13 +1,13 @@
 define opsview::server::servicecheck (
-  $ensure = 'present',
-  $description = '',
-  $servicegroup,
-  $check_period = '24x7',
-  $check_interval = '5',
-  $check_attempts = '3',
-  $retry_check_interval = '1',
   $plugin,
-  $args = ''
+  $servicegroup,
+  $ensure               = 'present',
+  $description          = '',
+  $check_period         = '24x7',
+  $check_interval       = '5',
+  $check_attempts       = '3',
+  $retry_check_interval = '1',
+  $args                 = ''
 ) {
 
   require 'opsview::rest_client'
@@ -24,5 +24,4 @@ define opsview::server::servicecheck (
     args                 => $args,
     reload_opsview       => true,
   }
-
 }

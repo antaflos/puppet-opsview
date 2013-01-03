@@ -1,7 +1,7 @@
 define opsview::server::hosttemplate (
-  $ensure = 'present',
-  $description = '',
   $servicechecks,
+  $ensure         = 'present',
+  $description    = '',
   $managementurls = undef,
 ){
   require 'opsview::rest_client'
@@ -14,5 +14,4 @@ define opsview::server::hosttemplate (
     managementurls => $managementurls,
     reload_opsview => true,
   }
-
 }
