@@ -2,6 +2,7 @@ class opsview::server::host (
   $hostgroup,
   $hosttemplates = undef,
   $servicechecks = undef,
+  $parents = undef,
 ){
   @@opsview_monitored { $::hostname:
     ensure         => 'present',
@@ -9,6 +10,7 @@ class opsview::server::host (
     hostgroup      => $hostgroup,
     hosttemplates  => $hosttemplates,
     servicechecks  => $servicechecks,
+    parents        => $parents,
     reload_opsview => true,
   }
 }
