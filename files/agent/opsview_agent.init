@@ -24,7 +24,7 @@ DAEMON=/usr/local/nagios/bin/nrpe
 NAME=opsview-agent
 DESC=opsview-agent
 CONFIG=/usr/local/nagios/etc/nrpe.cfg
-PIDFILE=/usr/local/nagios/var/nrpe.pid
+PIDFILE=/var/tmp/nrpe.pid
 
 # Problem due to file descriptor left open by Debian apt-get process
 exec 3>/dev/null
