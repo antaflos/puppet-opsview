@@ -8,7 +8,8 @@ define opsview::server::servicecheck (
   $check_attempts       = '3',
   $retry_check_interval = '1',
   $args                 = '',
-  $keywords             = undef
+  $keywords             = undef,
+  $notification_options = 'w,c,r,u,f',
 ) {
 
   require 'opsview::rest_client'
@@ -24,6 +25,7 @@ define opsview::server::servicecheck (
     plugin               => $plugin,
     args                 => $args,
     keywords             => $keywords,
+    notification_options => $notification_options,
     reload_opsview       => true,
   }
 }
