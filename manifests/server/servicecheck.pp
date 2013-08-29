@@ -25,7 +25,7 @@ define opsview::server::servicecheck (
     plugin               => $plugin,
     args                 => $args,
     keywords             => $keywords,
-    notification_options => $notification_options
+    notification_options => $notification_options,
     reload_opsview       => true,
   }
 }
