@@ -1,5 +1,18 @@
-#! /bin/sh
+#! /bin/sh 
 #
+# Opsview Agent init script done right (or at least better than the original).
+# Complies with LSB specs and exits with proper return values. Also features more
+# robust status, start and stop functions.
+# 
+# TODO:
+# Will not work on RHEL/CentOS without some modifications, namely the functions
+# log_daemon_msg and log_end_msg don't exist there. On the other hand there are
+# no other Debian/Ubuntu-specific functions used (such as start-stop-daemon). It
+# is probably a good idea to refactor this script so it doesn't use any of the
+# log_*_msgs at all.
+#
+# AUTHORS:
+# RISE Ops <ops@rise-world.com>
 
 ### BEGIN INIT INFO
 # Provides:          opsview-agent
@@ -11,85 +24,217 @@
 # Default-Stop:      0 1 6
 # Short-Description: Start/Stop the Nagios remote plugin execution daemon
 ### END INIT INFO
-
-# Load the VERBOSE setting and other rcS variables
-. /lib/init/vars.sh
+### CHKCONFIG INFO
+# chkconfig: 345 99 01
+# description: Control script for Opsview
+# processname: nrpe
+### END CHKCONFIG INFO
 
 # Define LSB log_* functions.
-# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
 . /lib/lsb/init-functions
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/local/nagios/bin/nrpe
 NAME=opsview-agent
 DESC=opsview-agent
-CONFIG=/usr/local/nagios/etc/nrpe.cfg
-PIDFILE=/var/tmp/nrpe.pid
+AGENT_BASE=/usr/local/nagios
+DAEMON=$AGENT_BASE/bin/nrpe
+CONFIG=$AGENT_BASE/etc/nrpe.cfg
 
-# Problem due to file descriptor left open by Debian apt-get process
-exec 3>/dev/null
+# Exit if the package is not installed
+if [ ! -x "$DAEMON" ]; then
+    log_failure_msg "$NAME is not installed or not executable"
+    exit 1
+fi
 
-test -x $DAEMON || exit 0
+getpid()
+{
+    PID=$(pgrep -f -u nagios "$DAEMON")
+    echo $PID
+}
 
-set -e
+do_sanity_checks()
+{
+    if [ ! -f $CONFIG -o ! -r $CONFIG ]; then
+        log_failure_msg "NRPE configuration file $CONFIG not found or not readable"
+        exit 1
+    fi
+}
 
 do_status() {
-    set +e
-    
-    # Test if the daemon is running
-    start-stop-daemon --test --start --pidfile "$PIDFILE" \
-    --exec "$DAEMON" \
-    >/dev/null 2>&1
-    if [ "$?" = "0" ]; then
+    local ret=1
+
+    # Check if PID file exists and is non-empty
     if [ -r "$PIDFILE" -a -s "$PIDFILE" ]; then
-    log_success_msg "$DESC is not running, but PID file exists."
-    return 1
+        # Test if the daemon is running
+        PID="$(cat $PIDFILE)"
+        ps -p $PID >/dev/null
+        if [ "$?" -eq 0 ]; then
+            # Daemon is running
+            ret=0
+        else
+            # Daemon is not running (but PID file exists)
+            ret=3
+        fi
+        # No PID file, check manually if a matching process is running
+    elif $(pgrep -f -u nagios "$DAEMON" >/dev/null); then
+        # Daemon is running (but without a PID file)
+        PID=$(pgrep -f -u nagios "$DAEMON")
+        log_warning_msg "NRPE is running without PID file as process $PID"
+        ret=0
     else
-    log_success_msg "$DESC is not running."
-    return 3
+        # No PID file exists and process table doesn't show daemon
+        # Daemon is not running
+        ret=3
     fi
-    else
-    log_success_msg "$DESC is running with pid $(cat $PIDFILE)"
+
+    return $ret
+}
+
+do_start()
+{
+    do_status
+    if [ "$?" -eq 0 ]; then
+        return 0
     fi
-    set -e
-    
+
+    if [ -e "$PIDFILE" ]; then
+        log_warning_msg "$DESC is not running but old PID file exists, cleaning up"
+        rm "$PIDFILE"
+    fi
+
+    # test to see if the pid file can be created
+    touch -a $PIDFILE 1>/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        log_failure_msg "Cannot write to $PIDFILE - exiting"
+        exit 1
+    fi
+    # if touch created an empty file, remove it
+    test ! -s $PIDFILE && rm -f $PIDFILE
+
+    $DAEMON -c $CONFIG -d
+
+    pgrep -f -u nagios $DAEMON >/dev/null
+
+    return $?
+}
+
+do_stop() 
+{
+    do_status
+    if [ "$?" -eq 3 ]; then
+        return 0
+    fi
+
+    PID=$(getpid)
+
+    kill $PID
+    if [ $? -ne 0 ]; then
+        log_failure_msg "Could not stop $DESC (PID $PID)"
+        return 1
+    fi
+
+    # All went well and we manually remove the PID file
+    rm -f "$PIDFILE"
+
     return 0
 }
 
+do_sanity_checks
+
+# Switch to nagios if run as root. The following construct is directly from the
+# original opsview-agent init script and can probably be simplified quite a
+# bit.
+if [ $(id -u) -eq 0 ]; then
+    case "$0" in
+        /*)
+            cmd="$0"
+            ;;
+        *)
+            cmd=`which $0`
+            case "$cmd" in
+                /*)
+                    ;;
+                *)
+                    cmd="$PWD/$cmd"
+                    ;;
+            esac
+            ;;
+    esac
+    exec su - nagios -c "$cmd $@"
+fi
+
+# get the correct PID file out of the config file
+PIDFILE=$(grep "^pid_file=" $CONFIG | awk -F= '{print $2}')
+if [ "x$PIDFILE" = "x" ]; then
+    log_failure_msg "pid_file not set in $CONFIG - exiting"
+    exit 1
+fi
+
 case "$1" in
-  start)
-	echo "Starting $DESC" "$NAME"
-    # cleanup pidfile if necessary
-    if [ -f $PIDFILE ]; then
-        ps -p `cat $PIDFILE` | grep nrpe 1>/dev/null || rm -f $PIDFILE
-    fi
-    start-stop-daemon --chuid nagios --oknodo --start $NICENESS --exec $DAEMON -- -c $CONFIG -d $DAEMON_OPTS
-	;;
-  stop)
-	echo "Stopping $DESC" "$NAME"
-	start-stop-daemon --stop --quiet --oknodo --exec $DAEMON
-	;;
-  status)
-	do_status
-	case "$?" in
-		0) log_end_msg 0 ;;
-		3) log_end_msg 3 ;;
-		*) log_end_msg 1 ;;
-	esac
-	;;
-  reload|force-reload)
-	echo "Reloading $DESC configuration files" "$NAME"
-	start-stop-daemon --stop --signal HUP --quiet --exec $DAEMON
-	;;
-  restart)
-	$0 stop
-	sleep 1
-	$0 start
-	;;
-  *)
-	echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
-	exit 1
-	;;
+    status)
+        set +e
+        do_status
+        case "$?" in
+            3)
+                log_daemon_msg "$DESC is not running"
+                exit 3
+                ;;
+            0)
+                PID="$(getpid)"
+                log_daemon_msg "$DESC is running (PID $PID)"
+                exit 0
+                ;;
+            *)
+                log_end_msg 1
+                exit 1
+                ;;
+        esac
+        ;;
+    start)
+        set +e
+        log_daemon_msg "Starting $DESC" "$NAME"                                                                                                                                                                      
+        do_start
+        case "$?" in
+            0)
+                log_end_msg 0
+                exit 0
+                ;;
+            1)
+                log_end_msg 1
+                exit 1
+                ;;
+        esac
+        set -e
+        ;;
+    stop)
+        set +e
+        log_daemon_msg "Stopping $DESC" "$NAME"
+        do_stop
+        case "$?" in
+            0)
+                log_end_msg 0
+                exit 0
+                ;;
+            1)
+                log_end_msg 1
+                exit 1
+                ;;
+        esac
+        set -e
+        ;;
+    restart)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+
+    *)
+        echo "Usage: $N {start|stop|restart|status}" 
+        exit 1
+        ;;
 esac
 
-exit 0
+# Should never get here
+exit 1
