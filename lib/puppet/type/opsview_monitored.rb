@@ -33,7 +33,11 @@ Puppet::Type.newtype(:opsview_monitored) do
   newproperty(:monitored_by) do
     desc "The Opsview server that monitors this node"
   end
-  
+
+  newproperty(:notification_interval) do
+      desc "Host notification interval"
+  end
+
   newproperty(:parents, :array_matching => :all) do
     desc "Array of parents for this node"
   end
