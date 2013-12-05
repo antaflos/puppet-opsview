@@ -36,6 +36,7 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:notification_interval) do
       desc "Host notification interval"
+      defaultto "0"
   end
 
   newproperty(:parents, :array_matching => :all) do
