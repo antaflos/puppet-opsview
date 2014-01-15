@@ -1,0 +1,6 @@
+name 'yoyoyo'
+author 'Christian Paredes <christian.paredes@sbri.org>, Devon Peters <devon.peters@gmail.com>, Yo Yoyo <yoyoyo@email.com'
+description 'Puppet module for installing Opsview Puppet libraries that manage Opsview objects, such as hosts, servicechecks, servicegroups, etc.'
+source 'https://github.com/yoyoyo/puppet-opsview'
+project_page 'https://github.com/yoyoyo/puppet-opsview'
+version '0.4.x'
