@@ -1,14 +1,8 @@
-Stable release download
-=======================
-
-If you're looking for stable releases, you can download this module at
-the [Puppet Forge](http://forge.puppetlabs.com/users/cparedes/modules/puppet_opsview).
-
 Introduction
 =============
 
-Right now, the module only contains libraries to handle all of the REST
-requests to a given Opsview server.  You will need to create
+The module contains libraries to handle all of the REST
+requests to a given Opsview server. You will need to create
 /etc/puppet/opsview.conf with the following format on each client that you wish
 to connect with an Opsview server:
 
@@ -16,13 +10,21 @@ to connect with an Opsview server:
     username: foobar
     password: foobaz
 
-Please file bugs via the issue tracker above.
+You can do this via
+    include 'opsview::rest_client::config'
+
+and define the variables
+    $opsview_url (without the pending /rest)
+    $opsview_client
+    $opsview_pwd
+needed for the template.
+    
 
 Prerequisites
 =============
 
 * Puppet (of course :))  Tested most recently with puppet 2.7.9
-* rest-client, json gems.
+* rest-client, json.
 
 Puppet Types in this Module
 ===========================
@@ -35,6 +37,12 @@ Puppet Types in this Module
 * opsview_role
 * opsview_servicecheck
 * opsview_servicegroup
+
+Puppet Classes in this Module
+=============================
+
+* 
+
 
 List of things to do
 ====================
