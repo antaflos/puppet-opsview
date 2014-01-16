@@ -6,6 +6,4 @@ class opsview::agent::install {
     require => Class['opsview::agent::install::repos'],
     notify  => Class['opsview::agent::service'],
   }
-
-  Account::Systemuser['nagios'] -> Package['opsview-agent']
 }
