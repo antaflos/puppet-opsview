@@ -10,21 +10,44 @@ to connect with an Opsview server:
     username: foobar
     password: foobaz
 
-You can do this via
+You can do this by including the following line to the client puppet node config:
     include 'opsview::rest_client::config'
 
-and define the variables
+And you have to define the following variables (needed for the template):
     $opsview_url (without the pending /rest)
     $opsview_client
-    $opsview_pwd
-needed for the template.
-    
+    $opsview_passwd
+
+e.g. in site.pp
+    $opsview_url = 'https://my.opsview.server.at'
+    $opsview_client = 'opsview-client-name'
+    $opsview_passwd = 'opsview-client-passwd'
 
 Prerequisites
 =============
 
-* Puppet (of course :))  Tested most recently with puppet 2.7.9
+* Puppet (of course :))
 * rest-client, json.
+* when installing opsview::agent or opsview::server the user and group nagios will be created. If
+you manage user and groups by yourself be sure that user and group nagios is created before
+installing opsview::agent or opsview::server.
+
+Structure of this Module
+========================
+
+* opsview::agent
+    installs and configures opsview agent
+
+* opsview::rest-client
+    configures opsview rest-client
+
+* opsview::server
+    tbd: installs and configures opsview server
+    * host
+    * hostgroup
+    * servicecheck
+    * servicegroup
+    * hosttemplate
 
 Puppet Types in this Module
 ===========================
@@ -37,12 +60,6 @@ Puppet Types in this Module
 * opsview_role
 * opsview_servicecheck
 * opsview_servicegroup
-
-Puppet Classes in this Module
-=============================
-
-* 
-
 
 List of things to do
 ====================
@@ -60,3 +77,4 @@ Authors
 
 * Devon Peters &lt;devon.peters@gmail.com&gt;
 * Christian Paredes &lt;christian.paredes@sbri.org&gt;
+* Yoyoyo;
