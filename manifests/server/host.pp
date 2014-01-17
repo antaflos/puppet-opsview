@@ -5,7 +5,7 @@ class opsview::server::host (
   $parents = undef,
 ){
 
-  @@opsview_monitored { $::hostname:
+  @@opsview_monitored { $::fqdn:
     ensure         => 'present',
     ip             => $::fqdn,
     hostgroup      => $hostgroup,
