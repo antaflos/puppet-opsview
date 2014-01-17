@@ -2,7 +2,6 @@ define opsview::server::hostgroup (
   $ensure = 'present',
   $parent = undef,
 ){
-  require 'opsview::rest_client'
 
   opsview_hostgroup { $title:
     ensure         => $ensure,
@@ -10,5 +9,4 @@ define opsview::server::hostgroup (
     parent         => $parent,
     reload_opsview => true,
   }
-
 }

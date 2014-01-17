@@ -4,6 +4,7 @@ class opsview::server::host (
   $servicechecks = undef,
   $parents = undef,
 ){
+
   @@opsview_monitored { $::hostname:
     ensure         => 'present',
     ip             => $::fqdn,

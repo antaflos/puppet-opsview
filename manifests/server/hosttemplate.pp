@@ -4,7 +4,6 @@ define opsview::server::hosttemplate (
   $description    = '',
   $managementurls = undef,
 ){
-  require 'opsview::rest_client'
 
   opsview_hosttemplate { $title:
     ensure         => $ensure,
