@@ -345,7 +345,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "uncommitted" : "0",
        "parents" : [],
        "icon" : {
-          "name" : "LOGO - Debian Linux"
+          "name" : "LOGO - Ubuntu"
        },
        "retry_check_interval" : "1",
        "ip" : "localhost",
