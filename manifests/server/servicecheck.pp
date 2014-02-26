@@ -12,8 +12,6 @@ define opsview::server::servicecheck (
   $notification_options = 'w,c,r,u,f',
 ) {
 
-  require 'opsview::rest_client'
-
   opsview_servicecheck { $title:
     ensure               => $ensure,
     description          => $description,
