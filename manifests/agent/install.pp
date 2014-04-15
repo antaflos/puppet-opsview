@@ -3,7 +3,5 @@ class opsview::agent::install {
 
   package { 'opsview-agent':
     ensure  => 'latest',
-    require => Class['opsview::agent::install::repos'],
-    notify  => Class['opsview::agent::service'],
   }
 }

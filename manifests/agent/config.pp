@@ -7,8 +7,6 @@ class opsview::agent::config {
     mode    => '0755',
     path    => '/etc/init.d/opsview-agent',
     source  => 'puppet:///modules/opsview/agent/opsview_agent.init',
-    require => Class['opsview::agent::install'],
-    notify  => Class['opsview::agent::service'],
   }
 }
 
